@@ -8,6 +8,17 @@ def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, '0')[0..4]
 end
 
+def clean_phone_number(phone_number)
+  # Remove all symbols from a phone number, including space.
+  # Then, count the digits and check if the numbers are valid.
+  phone_number = phone_number.tr('()-.', '').delete(' ')
+  if phone_number.length == 10
+    phone_number
+  elsif phone_number.length == 11 && phone_number.start_with?('1')
+    phone_number.slice(1, 10)
+  end
+end
+
 def legislator_by_zipcode(zipcode)
   # Accessing the API
   civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
@@ -59,9 +70,14 @@ contents.each do |row|
   # Handling Missing Zip Codes
   zipcode = clean_zipcode(row[:zipcode])
 
+  # Handle bad, good and missing phone numbers
+  phone_number = clean_phone_number(row[:homephone])
+
   legislators = legislator_by_zipcode(zipcode)
 
   form_letter = erb_template.result(binding)
 
   save_letter(id, form_letter)
+
+  puts phone_number
 end
