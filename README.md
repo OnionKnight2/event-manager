@@ -21,3 +21,7 @@ validity.
 Find out what the peak registration hours are.
 
 --------------------------------------------------------------------
+
+## Assignment 3: Day of the Week Targeting
+
+Find out what the peak registration days are.
