@@ -15,3 +15,9 @@ validity.
 - If the phone number is more than 11 digits, assume that it is a bad number
 
 --------------------------------------------------------------------
+
+## Assignment 2: Time Targeting
+
+Find out what the peak registration hours are.
+
+--------------------------------------------------------------------
