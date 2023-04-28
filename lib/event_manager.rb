@@ -2,6 +2,7 @@
 
 require 'csv'
 require 'google/apis/civicinfo_v2'
+require 'erb'
 
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, '0')[0..4]
@@ -14,58 +15,28 @@ def legislator_by_zipcode(zipcode)
 
   # Showing All Legislators in a Zip Code
   begin
-    legislators = civic_info.representative_info_by_address(
+    civic_info.representative_info_by_address(
       address: zipcode,
       levels: 'country',
       roles: ['legislatorLowerBody', 'legislatorUpperBody']
-    )
-    legislators = legislators.officials
-    # For Clean Display of Legislators
-    legislator_names = legislators.map(&:name)
-    legislator_names.join(', ')
+    ).officials
   rescue 
     'You can find your representatives by visiting www.commoncause.org/take-action/find-elected-officials'
   end
 end
 
+def save_letter(id, form_letter)
+  Dir.mkdir('output') unless Dir.exist?('output')
+
+  filename = "output/thanks_#{id}.html"
+
+  File.open(filename, 'w') do |file|
+    file.puts form_letter
+  end
+end
+
 puts 'Event Manager Initialized'
 puts ''
-
-=begin
-# Read the File Contents
-if File.exist?('event_attendees.csv')
-  contents = File.read('event_attendees.csv')
-  puts contents
-  puts ''
-else
-  puts 'There is no such file.'
-end
-
-# Read the File Line By Line
-lines = File.readlines('event_attendees.csv')
-lines.each do |line|
-  puts line
-end
-puts ''
-
-# Display the First Names of All Attendees
-lines.each do |line|
-  columns = line.split(',')
-  name = columns[2]
-  puts name
-end
-puts ''
-
-# Skipping the Header Row
-lines.each_with_index do |line, index|
-  next if index.zero?
-
-  columns = line.split(',')
-  name = columns[2]
-  puts name
-end
-puts ''
-=end
 
 # Switching over to use the CSV Library
 # Accessing Columns by their Names
@@ -75,8 +46,13 @@ contents = CSV.open(
   header_converters: :symbol
 )
 
+# Load our erb template
+template_letter = File.read('form_letter.erb')
+erb_template = ERB.new(template_letter)
+
 # Displaying the Zip Codes of All Attendees
 contents.each do |row|
+  id = row[0]
   name = row[:first_name]
 
   # Handling Bad and Good Zip Codes
@@ -85,7 +61,7 @@ contents.each do |row|
 
   legislators = legislator_by_zipcode(zipcode)
 
-  puts "#{name} #{zipcode} #{legislators}"
-  puts ''
+  form_letter = erb_template.result(binding)
+
+  save_letter(id, form_letter)
 end
-puts ''
