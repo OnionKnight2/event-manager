@@ -36,6 +36,19 @@ def legislator_by_zipcode(zipcode)
   end
 end
 
+# Take the user's registered date, create a new Time object with that information
+# and push current hour to hours array
+def add_hour(registered_date, hour)
+  time = Time.strptime(registered_date, '%m/%d/%y %H:%M')
+
+  hour.push(time.hour)
+end
+
+# Find hours with most occurances
+def find_peak_hours(hours)
+  hours.max_by { |hour| hours.count(hour) }
+end
+
 def save_letter(id, form_letter)
   Dir.mkdir('output') unless Dir.exist?('output')
 
@@ -62,6 +75,7 @@ template_letter = File.read('form_letter.erb')
 erb_template = ERB.new(template_letter)
 
 # Displaying the Zip Codes of All Attendees
+hours = []
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
@@ -75,9 +89,14 @@ contents.each do |row|
 
   legislators = legislator_by_zipcode(zipcode)
 
+  add_hour(row[:regdate], hours)
+
   form_letter = erb_template.result(binding)
 
   save_letter(id, form_letter)
 
-  puts phone_number
+  # puts phone_number
 end
+
+peak_hours = find_peak_hours(hours)
+puts peak_hours
