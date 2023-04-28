@@ -38,15 +38,23 @@ end
 
 # Take the user's registered date, create a new Time object with that information
 # and push current hour to hours array
-def add_hour(registered_date, hour)
+def add_hour(registered_date, hours)
   time = Time.strptime(registered_date, '%m/%d/%y %H:%M')
 
-  hour.push(time.hour)
+  hours.push(time.hour)
 end
 
-# Find hours with most occurances
-def find_peak_hours(hours)
-  hours.max_by { |hour| hours.count(hour) }
+# Take the user's registered date, create a new Time object with that information
+# and push current day to days array
+def add_day(registered_date, days)
+  time = Time.strptime(registered_date, '%m/%d/%y')
+
+  days.push(time.strftime('%A'))
+end
+
+# Find item in array with most occurances
+def find_peak(array)
+  array.max_by { |item| array.count(item) }
 end
 
 def save_letter(id, form_letter)
@@ -76,6 +84,7 @@ erb_template = ERB.new(template_letter)
 
 # Displaying the Zip Codes of All Attendees
 hours = []
+days = []
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
@@ -90,6 +99,7 @@ contents.each do |row|
   legislators = legislator_by_zipcode(zipcode)
 
   add_hour(row[:regdate], hours)
+  add_day(row[:regdate], days)
 
   form_letter = erb_template.result(binding)
 
@@ -98,5 +108,7 @@ contents.each do |row|
   # puts phone_number
 end
 
-peak_hours = find_peak_hours(hours)
-puts peak_hours
+peak_hours = find_peak(hours)
+peak_days = find_peak(days)
+puts "Peak hours: #{peak_hours}"
+puts "Peak days: #{peak_days}"
