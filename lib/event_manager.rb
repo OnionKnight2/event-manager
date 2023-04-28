@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require 'csv'
 puts 'Event Manager Initialized'
+puts ''
 
+=begin
 # Read the File Contents
 if File.exist?('event_attendees.csv')
   contents = File.read('event_attendees.csv')
@@ -33,5 +36,22 @@ lines.each_with_index do |line, index|
   columns = line.split(',')
   name = columns[2]
   puts name
+end
+puts ''
+=end
+
+# Switching over to use the CSV Library
+# Accessing Columns by their Names
+contents = CSV.open(
+  'event_attendees.csv',
+  headers: true,
+  header_converters: :symbol
+)
+
+# Displaying the Zip Codes of All Attendees
+contents.each do |row|
+  name = row[:first_name]
+  zipcode = row[:zipcode]
+  puts "#{name} #{zipcode}"
 end
 puts ''
